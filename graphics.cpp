@@ -7,6 +7,9 @@ using namespace std;
 
 GLdouble width, height;
 int wd;
+enum state{menu, flappybird, pong};
+state gameState = menu;
+
 
 
 void init() {
@@ -40,7 +43,17 @@ void display() {
     /*
      * Draw here
      */
+    if(gameState == menu){
+        cout << "menu" << endl;
+    }
 
+    if(gameState == flappybird){
+        cout << "Playing flappy bird" << endl;
+    }
+
+    if(gameState == pong){
+        cout << "Playing pong" << endl;
+    }
 
     glFlush();  // Render now
 }
@@ -52,17 +65,23 @@ void kbd(unsigned char key, int x, int y) {
         glutDestroyWindow(wd);
         exit(0);
     }
-    if (key == 's') {
-
-    }
     glutPostRedisplay();
 }
 
 void kbdUp(unsigned char key, int x, int y) {
 
-    if (key == 's') {
-
+    if (key == 'f') {
+        gameState = flappybird;
     }
+
+    if (key == 'p') {
+        gameState = pong;
+    }
+
+    if (key == 'm') {
+        gameState = menu;
+    }
+
     glutPostRedisplay();
 }
 
