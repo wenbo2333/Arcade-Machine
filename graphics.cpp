@@ -12,7 +12,7 @@ using namespace std;
 GLdouble width, height;
 int wd, score, speed;
 int pad1x = 0,pad1y = 250, pad2x = 500, pad2y = 250, velocityX = 3, velocityY = 3, point1 = 0, point2 = 0, ballStart = 1, computerDifficulty = 1;
-int gravity = 2, asteroidSpeed = 1;
+int gravity = 2, asteroidSpeed = 2, spaceRaceScore = 0, spaceRaceLives = 3;
 const color skyBlue(77/255.0, 213/255.0, 240/255.0);
 const color grassGreen(26/255.0, 176/255.0, 56/255.0);
 const color white(1, 1, 1);
@@ -31,16 +31,18 @@ vector<Rect> buildings2;
 vector<Rect> buildings3;
 Rect user;
 
-enum state{menu, flappybird, pong, flappyEnding, spaceRace};
+enum state{menu, flappybird, pong, flappyEnding, spaceRace, spaceRaceEnding};
 state gameState = menu;
 
 string label, label1, label2;
 string lable1p, lable2p, winlablep, winlable2p;
-string menuLabel, menuLabel1, menuLabel2;
+string menuLabel, menuLabel1, menuLabel2, menuLabel3, menuLabel4;
+string spaceScoreLabel, spaceLivesLabel;
 
 Rect ball;
 Rect paddle1;
 Rect paddle2;
+Rect spaceship;
 
 
 void initAsteroids() {
@@ -114,6 +116,12 @@ void initUser() {
     user.setColor(white);
 }
 
+void initSpaceship (){
+    spaceship.setCenter(width/2, height);
+    spaceship.setSize(15, 15);
+    spaceship.setColor(skyBlue);
+}
+
 void initPaddle1() {
     //initialize paddle
     paddle1.setCenter(pad1x, pad1y);
@@ -160,6 +168,7 @@ void init() {
     initPaddle2();
     initBall();
     initAsteroids();
+    initSpaceship();
 }
 
 /* Initialize OpenGL Graphics */
@@ -191,8 +200,10 @@ void display() {
      */
     if(gameState == menu){
         menuLabel = "Welcome to the arcade machine!";
-        menuLabel1 =  "Press p to play Pong or press f to play Flappy Bird!";
-        menuLabel2 = "Press m to return to the menu at any time!";
+        menuLabel1 = "Press 'p' to play Pong!";
+        menuLabel3 = "Press 'f' to play Flappy Bird!";
+        menuLabel4 = "Press 'r' to play Space Race!";
+        menuLabel2 = "Press 'm' to return to the menu at any time!";
         glColor3f(1, 0, 0);
         glRasterPos2i(120, 240);
         for (const char &letter : menuLabel) {
@@ -200,13 +211,28 @@ void display() {
         }
 
         glColor3f(1, 0, 0);
-        glRasterPos2i(30, 250);
+        glRasterPos2i(150, 255);
         for (const char &letter : menuLabel1) {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
 
         glColor3f(1, 0, 0);
-        glRasterPos2i(75, 260);
+        glRasterPos2i(120, 270);
+        for (const char &letter : menuLabel3) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        glColor3f(1, 0, 0);
+        glRasterPos2i(125, 285);
+        for (const char &letter : menuLabel4) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+
+
+
+        glColor3f(1, 0, 0);
+        glRasterPos2i(75, 295);
         for (const char &letter : menuLabel2) {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
@@ -253,7 +279,7 @@ void display() {
         grass.draw();
         label = "Game Over";
         label2 = "You Survived " + to_string(score) + " Seconds";
-        label1 = "Press f to Play Again";
+        label1 = "Press 'f' to Play Again";
         speed = -3;
         glColor3f(1, 0, 0);
         glRasterPos2i(width/2 - (4 * label.length()), height/2 + 7);
@@ -296,14 +322,14 @@ void display() {
 
         if(point1 >= 3){
             winlablep = "Computer Wins!";
-            winlable2p = "Press p to play again";
+            winlable2p = "Press 'p' to play again";
             velocityX = 0;
             velocityY = 0;
         }
 
         if(point2 >= 3){
             winlablep = "Player Wins!";
-            winlable2p = "Press p to play again";
+            winlable2p = "Press 'p' to play again";
             velocityX = 0;
             velocityY = 0;
         }
@@ -336,6 +362,68 @@ void display() {
         for (unique_ptr<Shape> &a : asteroids) {
             // #polymorphism
             a->draw();
+            if(dynamic_cast<Rect&>(*a).isOverlapping(spaceship)){
+                initSpaceship();
+                initAsteroids();
+                spaceRaceLives--;
+            }
+        }
+        spaceship.draw();
+
+        spaceScoreLabel = "Score: ";
+        glRasterPos2i(10, 10);
+        for (const char &letter : spaceScoreLabel) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        glRasterPos2i(60, 10);
+        for (const char &letter : to_string(spaceRaceScore)) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        spaceLivesLabel = "Lives: ";
+        glRasterPos2i(width-70, 10);
+        for (const char &letter : spaceLivesLabel) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        glRasterPos2i(width-20, 10);
+        for (const char &letter : to_string(spaceRaceLives)) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        if(spaceship.getTopY() <= 0){
+            initSpaceship();
+            initAsteroids();
+            asteroidSpeed++;
+            spaceRaceScore++;
+        }
+
+        if(spaceRaceLives <= 0){
+            gameState = spaceRaceEnding;
+        }
+    }
+
+    if(gameState == spaceRaceEnding){
+        label = "Game Over";
+        label2 = "Score: " + to_string(spaceRaceScore);
+        label1 = "Press 'r' to Play Again";
+        speed = -3;
+        glColor3f(1, 0, 0);
+        glRasterPos2i(width/2 - (4 * label.length()), height/2 + 7);
+        for (const char &letter : label) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        glRasterPos2i(width/2 - (4 * label2.length()), height/2 + 25);
+        for (const char &letter : label2) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+
+        glRasterPos2i(width/2 - (4 * label1.length()), height/2 + 43);
+        for (const char &letter : label1) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
     }
 
@@ -384,6 +472,10 @@ void kbdUp(unsigned char key, int x, int y) {
         gameState = spaceRace;
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
         initAsteroids();
+        initSpaceship();
+        spaceRaceScore = 0;
+        spaceRaceLives = 3;
+        asteroidSpeed = 2;
     }
 
     glutPostRedisplay();
@@ -396,12 +488,19 @@ void kbdS(int key, int x, int y) {
             if(paddle2.getBottomY() <= height) {
                 paddle2.move(0, 6);
             }
+            if(gameState == spaceRace) {
+                spaceship.move(0,3);
+            }
             break;
         case GLUT_KEY_LEFT:
-
+            if(gameState == spaceRace) {
+                spaceship.move(-3,0);
+            }
             break;
         case GLUT_KEY_RIGHT:
-
+            if(gameState == spaceRace) {
+                spaceship.move(3,0);
+            }
             break;
         case GLUT_KEY_UP:
             if(gameState == flappybird){
@@ -411,6 +510,9 @@ void kbdS(int key, int x, int y) {
                 if(paddle2.getTopY() > 0) {
                     paddle2.move(0,-6);
                 }
+            }
+            if(gameState == spaceRace) {
+                spaceship.move(0,-3);
             }
             break;
     }
