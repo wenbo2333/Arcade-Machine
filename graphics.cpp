@@ -12,7 +12,7 @@ using namespace std;
 GLdouble width, height;
 int wd, score, speed;
 int pad1x = 0,pad1y = 250, pad2x = 500, pad2y = 250, velocityX = 3, velocityY = 3, point1 = 0, point2 = 0, ballStart = 1, computerDifficulty = 1;
-int gravity = 2;
+int gravity = 2, asteroidSpeed = 1;
 const color skyBlue(77/255.0, 213/255.0, 240/255.0);
 const color grassGreen(26/255.0, 176/255.0, 56/255.0);
 const color white(1, 1, 1);
@@ -25,13 +25,13 @@ const color orange(1, 163/255.0, 22/255.0);
 const color cyan (0, 1, 1);
 
 vector<unique_ptr<Shape>> clouds;
+vector<unique_ptr<Shape>> asteroids;
 Rect grass;
-vector<Rect> buildings1;
 vector<Rect> buildings2;
 vector<Rect> buildings3;
 Rect user;
 
-enum state{menu, flappybird, pong, flappyEnding};
+enum state{menu, flappybird, pong, flappyEnding, spaceRace};
 state gameState = menu;
 
 string label, label1, label2;
@@ -41,6 +41,16 @@ string menuLabel, menuLabel1, menuLabel2;
 Rect ball;
 Rect paddle1;
 Rect paddle2;
+
+
+void initAsteroids() {
+    asteroids.clear();
+    dimensions d(40,7);
+    for(int i = 0; i < 50; i++){
+        asteroids.push_back(make_unique<Rect>(white,d));
+        asteroids[i]->setCenter((rand() % int(height))- height, (rand() % int(height)));
+    }
+}
 
 void initClouds() {
     // Note: the Rect objects that make up the flat bottom of the clouds
@@ -149,6 +159,7 @@ void init() {
     initPaddle1();
     initPaddle2();
     initBall();
+    initAsteroids();
 }
 
 /* Initialize OpenGL Graphics */
@@ -321,6 +332,13 @@ void display() {
         }
     }
 
+    if(gameState == spaceRace){
+        for (unique_ptr<Shape> &a : asteroids) {
+            // #polymorphism
+            a->draw();
+        }
+    }
+
     glFlush();  // Render now
 }
 
@@ -360,6 +378,12 @@ void kbdUp(unsigned char key, int x, int y) {
     if (key == 'm') {
         gameState = menu;
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
+    }
+
+    if(key == 'r') {
+        gameState = spaceRace;
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
+        initAsteroids();
     }
 
     glutPostRedisplay();
@@ -426,6 +450,18 @@ void cloudTimer(int dummy) {
 
     glutPostRedisplay();
     glutTimerFunc(50, cloudTimer, dummy);
+}
+
+void asteroidTimer(int dummy) {
+    for(unique_ptr<Shape> &a : asteroids){
+        a->moveX(asteroidSpeed);
+        if (a->getCenterX() > width + 30) {
+            // Set it to the right of the screen so that it passes through again
+            a->setCenterX(-30);
+        }
+    }
+    glutPostRedisplay();
+    glutTimerFunc(50, asteroidTimer, dummy);
 }
 
 void buildingTimer(int dummy) {
@@ -579,6 +615,8 @@ int main(int argc, char** argv) {
     glutTimerFunc(0, userTimer, 0);
     glutTimerFunc(0, ballTimer, 0);
     glutTimerFunc(0, gameTimerp, 0);
+    glutTimerFunc(0, asteroidTimer, 0);
+
 
     // Enter the event-processing loop
     glutMainLoop();
