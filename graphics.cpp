@@ -7,10 +7,12 @@
 #include <time.h>
 #include <ctime>
 #include <string>
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 GLdouble width, height;
-int wd, score, speed;
+int wd, score, speed, flappyHighScore, spaceRunnerHighScore;
 int pad1x = 0,pad1y = 250, pad2x = 500, pad2y = 250, velocityX = 3, velocityY = 3, point1 = 0, point2 = 0, ballStart = 1, computerDifficulty = 1;
 int gravity = 2, asteroidSpeed = 2, spaceRaceScore = 0, spaceRaceLives = 3;
 const color skyBlue(77/255.0, 213/255.0, 240/255.0);
@@ -43,6 +45,8 @@ Rect ball;
 Rect paddle1;
 Rect paddle2;
 Rect spaceship;
+
+fstream myfile("../highscore.txt", ios_base::in);
 
 
 void initAsteroids() {
@@ -199,6 +203,12 @@ void display() {
      * Draw here
      */
     if(gameState == menu){
+        //get highscore from file
+        myfile >> flappyHighScore >> spaceRunnerHighScore;
+
+        cout << flappyHighScore << endl;
+        cout << spaceRunnerHighScore << endl;
+
         menuLabel = "Welcome to the arcade machine!";
         menuLabel1 = "Press 'p' to play Pong!";
         menuLabel3 = "Press 'f' to play Flappy Bird!";
