@@ -46,7 +46,6 @@ Rect paddle1;
 Rect paddle2;
 Rect spaceship;
 
-fstream myfile("../highscore.txt", ios_base::in);
 
 
 void initAsteroids() {
@@ -173,6 +172,10 @@ void init() {
     initBall();
     initAsteroids();
     initSpaceship();
+    //get highscore from file
+    fstream myfile("../highscore.txt", 	ios::in);
+    myfile >> flappyHighScore >> spaceRunnerHighScore;
+    myfile.close();
 }
 
 /* Initialize OpenGL Graphics */
@@ -203,16 +206,10 @@ void display() {
      * Draw here
      */
     if(gameState == menu){
-        //get highscore from file
-        myfile >> flappyHighScore >> spaceRunnerHighScore;
-
-        cout << flappyHighScore << endl;
-        cout << spaceRunnerHighScore << endl;
-
         menuLabel = "Welcome to the arcade machine!";
         menuLabel1 = "Press 'p' to play Pong!";
         menuLabel3 = "Press 'f' to play Flappy Bird!";
-        menuLabel4 = "Press 'r' to play Space Race!";
+        menuLabel4 = "Press 's' to play Space Race!";
         menuLabel2 = "Press 'm' to return to the menu at any time!";
         glColor3f(1, 0, 0);
         glRasterPos2i(120, 240);
@@ -238,14 +235,28 @@ void display() {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
 
-
-
-
         glColor3f(1, 0, 0);
         glRasterPos2i(75, 295);
         for (const char &letter : menuLabel2) {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
+
+
+        menuLabel = "Flappy Bird high score: " + to_string(flappyHighScore) + " seconds";
+        menuLabel1 = "Space Race high score: " + to_string(spaceRunnerHighScore);
+
+        glColor3f(0, 0, 1);
+        glRasterPos2i(100, 400);
+        for (const char &letter : menuLabel) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
+        glColor3f(0, 0, 1);
+        glRasterPos2i(130, 415);
+        for (const char &letter : menuLabel1) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+
 
     }
 
@@ -306,6 +317,9 @@ void display() {
         glRasterPos2i(width/2 - (4 * label1.length()), height/2 + 43);
         for (const char &letter : label1) {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+        }
+        if(score > flappyHighScore){
+            flappyHighScore = score;
         }
 
     }
@@ -417,7 +431,7 @@ void display() {
     if(gameState == spaceRaceEnding){
         label = "Game Over";
         label2 = "Score: " + to_string(spaceRaceScore);
-        label1 = "Press 'r' to Play Again";
+        label1 = "Press 's' to Play Again";
         speed = -3;
         glColor3f(1, 0, 0);
         glRasterPos2i(width/2 - (4 * label.length()), height/2 + 7);
@@ -435,8 +449,11 @@ void display() {
         for (const char &letter : label1) {
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
+        if(spaceRaceScore > spaceRunnerHighScore){
+            spaceRunnerHighScore = spaceRaceScore;
+        }
     }
-
+    //cout << flappyHighScore << endl << spaceRunnerHighScore << endl;
     glFlush();  // Render now
 }
 
@@ -445,6 +462,10 @@ void kbd(unsigned char key, int x, int y) {
     // escape
     if (key == 27) {
         glutDestroyWindow(wd);
+        fstream myfile("../highscore.txt", 	ios::out);
+        myfile << flappyHighScore << endl;
+        myfile << spaceRunnerHighScore << endl;
+        myfile.close();
         exit(0);
     }
     glutPostRedisplay();
@@ -478,7 +499,7 @@ void kbdUp(unsigned char key, int x, int y) {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
     }
 
-    if(key == 'r') {
+    if(key == 's') {
         gameState = spaceRace;
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
         initAsteroids();
@@ -498,17 +519,17 @@ void kbdS(int key, int x, int y) {
             if(paddle2.getBottomY() <= height) {
                 paddle2.move(0, 6);
             }
-            if(gameState == spaceRace) {
+            if(spaceship.getBottomY() <= height + 10) {
                 spaceship.move(0,3);
             }
             break;
         case GLUT_KEY_LEFT:
-            if(gameState == spaceRace) {
+            if(spaceship.getLeftX() >= 0) {
                 spaceship.move(-3,0);
             }
             break;
         case GLUT_KEY_RIGHT:
-            if(gameState == spaceRace) {
+            if(spaceship.getRightX() <= width) {
                 spaceship.move(3,0);
             }
             break;
@@ -538,14 +559,16 @@ void cursor(int x, int y) {
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
 void mouse(int button, int state, int x, int y) {
-
     glutPostRedisplay();
 }
 
-void timer(int dummy) {
-
+void saveTimer(int dummy) {
+    fstream myfile("../highscore.txt", 	ios::out);
+    myfile << flappyHighScore << endl;
+    myfile << spaceRunnerHighScore << endl;
+    myfile.close();
     glutPostRedisplay();
-    glutTimerFunc(30, timer, dummy);
+    glutTimerFunc(10000, saveTimer, dummy);
 }
 
 void cloudTimer(int dummy) {
@@ -719,7 +742,7 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouse);
 
     // handles timer
-    glutTimerFunc(0, timer, 0);
+    glutTimerFunc(0, saveTimer, 0);
     glutTimerFunc(0, scoreTimer, 0);
     glutTimerFunc(0, gameTimer, 0);
     glutTimerFunc(0, cloudTimer, 0);
