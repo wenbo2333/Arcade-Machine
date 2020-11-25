@@ -7,7 +7,6 @@
 #include <time.h>
 #include <ctime>
 #include <string>
-#include <iostream>
 #include <fstream>
 using namespace std;
 
