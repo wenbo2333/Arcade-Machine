@@ -22,8 +22,8 @@ NOTE: Classes used were from previous projects, redundant to test when already p
     a. to play space race, use all four arrow keys to navigate the spaceship to the other end of the screen
     
 ## Consepts
-Module 4 using graphics to play and draw the games.
-Module 2 using is-a relationships for the classes of the shapes, and polymorphism to create and draw a vector of pointers of shapes.
+1. Module 4 using graphics to play and draw the games.
+2. Module 2 using is-a relationships for the classes of the shapes, and polymorphism to create and draw a vector of pointers of shapes.
 
 ## Citations
 1. M4OEP-Graphics2-ohamburg
