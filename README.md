@@ -26,7 +26,7 @@ Module 4 using graphics to play and draw the games.
 Module 2 using is-a relationships for the classes of the shapes, and polymorphism to create and draw a vector of pointers of shapes.
 
 ## Citations
-M4OEP-Graphics2-ohamburg
-M4OEP-Graphics1-ohamburg
-Graphics-Starter
-Runner-ohamburg
+1. M4OEP-Graphics2-ohamburg
+2. M4OEP-Graphics1-ohamburg
+3. Graphics-Starter
+4. Runner-ohamburg
