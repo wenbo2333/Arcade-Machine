@@ -4,7 +4,7 @@ The high scores from Flappy Bird and Space Race are automatically saved and disp
 
 ## Needed to run program
 1. Mingw (if on windows)
-2. OpenGL and Glut (https://github.com/UVMCS120F2020/Graphics-Starter)
+2. OpenGL and Glut
 
 ## How to run program
 1. Open project in Clion
